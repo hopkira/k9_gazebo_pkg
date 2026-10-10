@@ -4,6 +4,15 @@
   <xacro:arg name="controllers_file" default="$(find k9_description)/config/controllers.yaml"/>
   <xacro:arg name="sim" default="true"/>
 
+  <!-- Real hardware drive settings. Ignored in simulation. -->
+  <xacro:arg name="drive_dry_run" default="false"/>
+  <xacro:arg name="drive_start_inhibited" default="true"/>
+  <xacro:arg name="drive_device" default="/dev/roboclaw"/>
+
+  <!-- Compose control implementations into this authoritative robot model. -->
+  <xacro:include filename="$(find k9_description)/model/k9_sim_control.xacro"/>
+  <xacro:include filename="$(find k9_drive_pkg)/urdf/k9_ros2_control.xacro"/>
+
   <!-- ===================================================== -->
   <!-- To generate SDF for Gazebo Sim                        -->
   <!-- Source the built workspace, then run gen.sh.          -->
@@ -633,46 +642,24 @@
   </joint>
 
   <!-- ===================================================== -->
-  <!-- Wheel and ear joint control (gz-sim, Jazzy)            -->
+  <!-- Wheel control                                         -->
   <!-- ===================================================== -->
 
+  <!-- Gazebo hardware interface. -->
   <xacro:if value="$(arg sim)">
-    <ros2_control name="K9SimSystem" type="system">
-      <hardware>
-        <plugin>gz_ros2_control/GazeboSimSystem</plugin>
-      </hardware>
-
-      <joint name="drivewhl_l_joint">
-        <command_interface name="velocity">
-          <param name="min">${-wheel_max_speed}</param>
-          <param name="max">${wheel_max_speed}</param>
-        </command_interface>
-        <state_interface name="position"/>
-        <state_interface name="velocity"/>
-        <state_interface name="effort"/>
-      </joint>
-      <joint name="drivewhl_r_joint">
-        <command_interface name="velocity">
-          <param name="min">${-wheel_max_speed}</param>
-          <param name="max">${wheel_max_speed}</param>
-        </command_interface>
-        <state_interface name="position"/>
-        <state_interface name="velocity"/>
-        <state_interface name="effort"/>
-      </joint>
-      <joint name="l_ear_joint">
-        <command_interface name="position"/>
-        <state_interface name="position"/>
-        <state_interface name="velocity"/>
-      </joint>
-
-      <joint name="r_ear_joint">
-        <command_interface name="position"/>
-        <state_interface name="position"/>
-        <state_interface name="velocity"/>
-      </joint>
-    </ros2_control>
+    <xacro:k9_sim_control wheel_max_speed="${wheel_max_speed}"/>
   </xacro:if>
+
+  <!-- Physical K9 hardware interface. -->
+  <xacro:unless value="$(arg sim)">
+    <xacro:k9_roboclaw_ros2_control
+        name="K9RoboClawSystem"
+        left_joint="drivewhl_l_joint"
+        right_joint="drivewhl_r_joint"
+        dry_run="$(arg drive_dry_run)"
+        start_inhibited="$(arg drive_start_inhibited)"
+        device="$(arg drive_device)"/>
+  </xacro:unless>
 
   <!-- ===================================================== -->
   <!-- IMU (gz-sim, Jazzy)                                   -->
