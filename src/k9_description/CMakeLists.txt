@@ -14,7 +14,9 @@ install(
 )
 
 # Install the latest model from its existing source location, not the legacy URDF.
-install(FILES ../k9_robot/src/description/k9.urdf.xacro
+install(FILES 
+    ../k9_robot/src/description/k9.urdf.xacro
+    ../k9_robot/src/description/k9_sim_control.xacro
   DESTINATION share/${PROJECT_NAME}/model)
 
 ament_package()

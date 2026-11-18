@@ -10,7 +10,7 @@
   <xacro:arg name="drive_device" default="/dev/roboclaw"/>
 
   <!-- Compose control implementations into this authoritative robot model. -->
-  <xacro:include filename="$(find k9_description)/model/k9_sim_control.xacro"/>
+  <xacro:include filename="k9_sim_control.xacro"/>
   <xacro:include filename="$(find k9_drive_pkg)/urdf/k9_ros2_control.xacro"/>
 
   <!-- ===================================================== -->
